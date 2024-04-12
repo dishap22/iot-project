@@ -137,10 +137,10 @@ char ssid[] = "<replace>";
 char pass[] = "<replace>";
 
 // Ensure that the credentials here allow you to publish and subscribe to the ThingSpeak channel.
-#define channelID 2505748 //should not be a string, just an int
-const char mqttUserName[] = "JhcvMg8VPCUfOxsSMgc4LDU"; 
-const char clientID[] = "JhcvMg8VPCUfOxsSMgc4LDU";
-const char mqttPass[] = "eTObAhOzbn21TMyIVt0XRoak";
+#define channelID <replace> //should not be a string, just an int
+const char mqttUserName[] = "<replace>"; 
+const char clientID[] = "<replace>";
+const char mqttPass[] = "<replace>";
 
 const char * PROGMEM thingspeak_ca_cert = \
 "-----BEGIN CERTIFICATE-----\n" \
