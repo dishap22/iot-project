@@ -19,6 +19,10 @@ int entering = 0;
 int exiting = 0;
 int num_people = 0;
 
+unsigned long lastHourTimestamp = 0;
+int entriesThisHour = 0;
+int exitsThisHour = 0;
+
 void get_distances() {
     // Read distances from ultrasonic sensors
     distance1 = readDistance(trigPin1, echoPin1);
@@ -226,6 +230,7 @@ void loop() {
     exiting = 0;
     Serial.println("Person entered");
     num_people++;
+    entriesThisHour++;
     // Update ThingSpeak channel when num_people changes with random data.
     mqttPublish( channelID, (String("field1=")+String(num_people)));
   }
@@ -234,6 +239,7 @@ void loop() {
     exiting = 0;
     Serial.println("Person exited");
     num_people--;
+    exitsThisHour++;
     // Update ThingSpeak channel when num_people changes with random data.
     mqttPublish( channelID, (String("field1=")+String(num_people)));
   }
@@ -255,6 +261,17 @@ void loop() {
   Serial.print(distance3);
   Serial.println(" cm");
   Serial.println();
+
+  unsigned long currentTimestamp = millis();
+  if (currentTimestamp - lastHourTimestamp >= 3600000) { // 3600000 milliseconds = 1 hour
+    // Publish the number of entries and exits for the current hour to fields 3 and 4
+    mqttPublish( channelID, (String("field3=")+String(entriesThisHour)));
+    mqttPublish( channelID, (String("field4=")+String(exitsThisHour)));
+    // Reset the counters and update the timestamp
+    entriesThisHour = 0;
+    exitsThisHour = 0;
+    lastHourTimestamp = currentTimestamp;
+  }
 
   delay(1000);
 
