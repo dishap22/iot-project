@@ -242,8 +242,8 @@ void loop() {
   unsigned long currentTimestamp = millis();
   if (currentTimestamp - lastHourTimestamp >= 3600000) { // 3600000 milliseconds = 1 hour
     // Publish the number of entries and exits for the current hour to fields 3 and 4
-    mqttPublish( channelID, (String("field3=")+String(entriesThisHour)));
-    mqttPublish( channelID, (String("field4=")+String(exitsThisHour)));
+    mqttPublish( channelID, (String("field2=")+String(entriesThisHour)));
+    mqttPublish( channelID, (String("field3=")+String(exitsThisHour)));
     // Reset the counters and update the timestamp
     entriesThisHour = 0;
     exitsThisHour = 0;
