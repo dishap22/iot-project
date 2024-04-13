@@ -5,10 +5,10 @@ Things to do (mid eval):
 - [X] Basic Thingspeak Integration
 - [ ] IR Sensor Code
 - [X] Add A First Graph
-- [ ] Add A Second Graph
-- [ ] Add A Third Graph
+- [X] Add A Second Graph
+- [X] Add A Third Graph
 - [ ] Door frame setup
 - [ ] Sensor placement
-- [ ] Data For Graph 1
-- [ ] Data For Graph 2
-- [ ] Data For Graph 3
+- [X] Data For Graph 1
+- [X] Data For Graph 2
+- [X] Data For Graph 3
