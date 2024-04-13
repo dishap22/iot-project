@@ -8,42 +8,18 @@ const int echoPin2 = 14;
 const int trigPin3 = 25;
 const int echoPin3 = 26;
 
-int people_in = 0;
-int people_out = 0;
-
-float height1;
-float height2;
-float height3;
-
 float distance1;
 float distance2;
 float distance3;
 
-void person_at_point_1_entered();
-void person_at_point_2_entered();
-void person_at_point_3_entered();
-void person_entered();
+int entering = 0;
+int exiting = 0;
 
-void person_at_point_1_exited();
-void person_at_point_2_exited();
-void person_at_point_3_exited();
-void person_exited();
-
-// Pin definition for IR sensor
-const int irPin = 32;
-
-void person_entered() {
-  people_in++;
-  Serial.println("Person entered");
-  Serial.print("Number of people in room: ");
-  Serial.println(people_in - people_out);
-}
-
-void person_exited() {
-  people_out++;
-  Serial.println("Person exited");
-  Serial.print("Number of people in room: ");
-  Serial.println(people_in - people_out);
+void get_distances() {
+    // Read distances from ultrasonic sensors
+    distance1 = readDistance(trigPin1, echoPin1);
+    distance2 = readDistance(trigPin2, echoPin2);
+    distance3 = readDistance(trigPin3, echoPin3);
 }
 
 // Function to read distance from ultrasonic sensor
@@ -57,78 +33,6 @@ float readDistance(int trigPin, int echoPin) {
   return (duration * 0.0343) / 2;  // Speed of sound = 343 m/s
 }
 
-void get_height() {
-  height1 = readDistance(trigPin1, echoPin1);
-  height2 = readDistance(trigPin2, echoPin2);
-  height3 = readDistance(trigPin3, echoPin3);
-}
-
-void get_distances() {
-  distance1 = height1 - readDistance(trigPin1, echoPin1);
-  distance2 = height2 - readDistance(trigPin2, echoPin2);
-  distance3 = height3 - readDistance(trigPin3, echoPin3);
-}
-
-void person_at_point_1_entered() {
-  while(distance1 != 0) {
-    get_distances();
-  }
-  if(distance2 != 0) {
-    person_at_point_2_entered();
-  }
-}
-
-void person_at_point_2_entered() {
-  while(distance2 != 0) {
-    get_distances();
-  }
-  if(distance1 != 0) {
-    person_at_point_1_entered();
-  } else {
-    person_at_point_3_entered();
-  }
-}
-
-void person_at_point_3_entered() {
-  while(distance3 != 0) {
-    get_distances();
-  }
-  if(distance2 != 0) {
-    person_at_point_2_entered();
-  }
-  person_entered();
-}
-
-void person_at_point_1_exited() {
-  while(distance1 != 0) {
-    get_distances();
-  }
-  if(distance2 != 0) {
-    person_at_point_2_exited();
-  }
-}
-
-void person_at_point_2_exited() {
-  while(distance2 != 0) {
-    get_distances();
-  }
-  if(distance1 != 0) {
-    person_at_point_1_exited();
-  } else {
-    person_at_point_3_exited();
-  }
-}
-
-void person_at_point_3_exited() {
-  while(distance3 != 0) {
-    get_distances();
-  }
-  if(distance2 != 0) {
-    person_at_point_2_exited();
-  }
-  person_exited();
-}
-
 void setup() {
   Serial.begin(9600);
 
@@ -138,37 +42,58 @@ void setup() {
   pinMode(echoPin2, INPUT);
   pinMode(trigPin3, OUTPUT);
   pinMode(echoPin3, INPUT);
-
-  pinMode(irPin, INPUT);
+  pinMode(22, OUTPUT);
+  pinMode(23, OUTPUT);
+  digitalWrite(22, HIGH);
+  digitalWrite(23, LOW);
 }
 
 void loop() {
-  get_height();
   // Read distances from ultrasonic sensors
+  get_distances();
 
-  // Read state of IR sensor
-  int irValue = digitalRead(irPin);
-
-  if(distance1 != 0) {
-    person_at_point_1_entered();
+  if(distance1 < 50 && exiting != 2) {
+    entering = 1;
+    exiting = 0;
+  }
+  if(distance3 < 50 && entering != 2) {
+    entering = 0;
+    exiting = 1;     
+  }
+  if(entering == 1 && distance2 < 50) {
+    entering = 2;
+  }
+  if(exiting == 1 && distance2 < 50) {
+    exiting = 2;
+  }
+  if(entering == 2 && distance3 < 50) {
+    entering = 0;
+    exiting = 0;
+    Serial.println("Person entered");
+  }
+  if(exiting == 2 && distance1 < 50) {
+    entering = 0;
+    exiting = 0;
+    Serial.println("Person exited");
   }
 
-  if(distance3 != 0) {
-    person_at_point_3_exited();
-  }
+  Serial.print("Entering: ");
+  Serial.println(entering);
+  Serial.print("Exiting: ");
+  Serial.println(exiting);
+  Serial.println();
 
   // Print sensor readings
-  // Serial.print("Distance 1: ");
-  // Serial.print(distance1);
-  // Serial.println(" cm");
-  // Serial.print("Distance 2: ");
-  // Serial.print(distance2);
-  // Serial.println(" cm");
-  // Serial.print("Distance 3: ");
-  // Serial.print(distance3);
-  // Serial.println(" cm");
-  // Serial.print("IR Sensor Value: ");
-  // Serial.println(irValue);
+  Serial.print("Distance 1: ");
+  Serial.print(distance1);
+  Serial.println(" cm");
+  Serial.print("Distance 2: ");
+  Serial.print(distance2);
+  Serial.println(" cm");
+  Serial.print("Distance 3: ");
+  Serial.print(distance3);
+  Serial.println(" cm");
+  Serial.println();
 
-  delay(1000);  // Wait for 1 second before next reading
+  delay(1000);
 }
