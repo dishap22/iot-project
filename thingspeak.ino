@@ -171,29 +171,6 @@ void setup() {
   digitalWrite(23, LOW);
 }
 
-/*void loop() {
-  // put your main code here, to run repeatedly:
-  // Reconnect to WiFi if it gets disconnected.
-  if (WiFi.status() != WL_CONNECTED) {
-      connectWifi();
-  }
-  
-  // Connect if MQTT client is not connected and resubscribe to channel updates.
-  if (!mqttClient.connected()) {
-     mqttConnect(); 
-     mqttSubscribe( channelID );
-  }
-  
-  // Call the loop to maintain connection to the server.
-  mqttClient.loop(); 
-  
-  // Update ThingSpeak channel periodically. The update results in the message to the subscriber.
-  if ( abs(long(millis()) - lastPublishMillis) > updateInterval*1000) {
-    mqttPublish( channelID, (String("field1=")+String(WiFi.RSSI())) );
-    lastPublishMillis = millis();
-  }
-}*/
-
 void loop() {
   // Reconnect to WiFi if it gets disconnected.
   if (WiFi.status() != WL_CONNECTED) {
