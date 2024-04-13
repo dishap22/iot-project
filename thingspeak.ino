@@ -235,7 +235,7 @@ void loop() {
     Serial.println("Person exited");
     num_people--;
     // Update ThingSpeak channel when num_people changes with random data.
-    mqttPublish( channelID, (String("field2=")+String(num_people)));
+    mqttPublish( channelID, (String("field1=")+String(num_people)));
   }
 
   Serial.print("Entering: ");
