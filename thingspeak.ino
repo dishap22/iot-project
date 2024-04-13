@@ -3,13 +3,16 @@
 #include <PubSubClient.h>
 #include <Arduino.h>
 
-// Pin definitions for ultrasonic sensors
+// Pin definitions for ultrasonic and IR sensors
 const int trigPin1 = 2;
 const int echoPin1 = 4;
 const int trigPin2 = 12;
 const int echoPin2 = 14;
 const int trigPin3 = 25;
 const int echoPin3 = 26;
+const int ir = 5;
+
+int dur = 0;
 
 float distance1;
 float distance2;
@@ -22,6 +25,7 @@ int num_people = 0;
 unsigned long lastHourTimestamp = 0;
 int entriesThisHour = 0;
 int exitsThisHour = 0;
+int DOOR=LOW;
 
 void get_distances() {
     // Read distances from ultrasonic sensors
@@ -42,14 +46,14 @@ float readDistance(int trigPin, int echoPin) {
 }
 
 // Ensure correct credentials to connect to your WiFi Network.
-char ssid[] = "<replace>";
-char pass[] = "<replace>";
+char ssid[] = "seera";
+char pass[] = "afwd3291";
 
 // Ensure that the credentials here allow you to publish and subscribe to the ThingSpeak channel.
-#define channelID <replace> //should not be a string, just an int
-const char mqttUserName[] = "<replace>"; 
-const char clientID[] = "<replace>";
-const char mqttPass[] = "<replace>";
+#define channelID 2506706 //should not be a string, just an int
+const char mqttUserName[] = "CSodJDMlGCIHKA8LJB8JES0"; 
+const char clientID[] = "CSodJDMlGCIHKA8LJB8JES0";
+const char mqttPass[] = "uAbYatwOcDfR28N+7S4Wnp10";
 
 const char * PROGMEM thingspeak_ca_cert = \
 "-----BEGIN CERTIFICATE-----\n" \
@@ -165,10 +169,15 @@ void setup() {
   pinMode(echoPin2, INPUT);
   pinMode(trigPin3, OUTPUT);
   pinMode(echoPin3, INPUT);
+  pinMode(ir, INPUT);
   pinMode(22, OUTPUT);
   pinMode(23, OUTPUT);
+  pinMode(32, OUTPUT);
+  pinMode(33, OUTPUT);
   digitalWrite(22, HIGH);
   digitalWrite(23, LOW);
+  digitalWrite(32, HIGH);
+  digitalWrite(33, LOW);
 }
 
 void loop() {
@@ -219,6 +228,20 @@ void loop() {
     exitsThisHour++;
     // Update ThingSpeak channel when num_people changes with random data.
     mqttPublish( channelID, (String("field1=")+String(num_people)));
+  }
+  DOOR=digitalRead(ir);
+  if(DOOR == HIGH){
+    Serial.print("Door is closed\n");
+    if(dur != 0){
+      Serial.print("Door was open for: ");
+      Serial.print(dur);
+      Serial.println(" seconds");
+    }
+    dur = 0;
+  }
+  else if(DOOR == LOW){
+    Serial.print("Door is open\n");
+    dur += 1;
   }
 
   Serial.print("Entering: ");
