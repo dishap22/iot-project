@@ -14,6 +14,7 @@ float distance3;
 
 int entering = 0;
 int exiting = 0;
+int num_people = 0;
 
 void get_distances() {
     // Read distances from ultrasonic sensors
@@ -70,11 +71,13 @@ void loop() {
     entering = 0;
     exiting = 0;
     Serial.println("Person entered");
+    num_people++;
   }
   if(exiting == 2 && distance1 < 50) {
     entering = 0;
     exiting = 0;
     Serial.println("Person exited");
+    num_people--;
   }
 
   Serial.print("Entering: ");
