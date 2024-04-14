@@ -49,6 +49,7 @@ void updateLeds() {
   if (occupancyPercentage >= 50 && occupancyPercentage < 100) {
     digitalWrite(led50, HIGH); // Turn on led50
   } else if (occupancyPercentage >= 100) {
+    digitalWrite(led50, HIGH);
     digitalWrite(led100, HIGH); // Turn on led100
   }
 }
