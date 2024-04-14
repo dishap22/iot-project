@@ -236,6 +236,7 @@ void loop() {
       Serial.print("Door was open for: ");
       Serial.print(dur);
       Serial.println(" seconds");
+      mqttPublish( channelID, (String("field4=")+String(dur)));
     }
     dur = 0;
   }
@@ -274,5 +275,4 @@ void loop() {
   }
 
   delay(1000);
-
 }
