@@ -12,6 +12,11 @@ const int trigPin3 = 25;
 const int echoPin3 = 26;
 const int ir = 5;
 
+const int led25 = 27;
+const int led50 = 19;
+const int led75 = 34;
+const int led100 = 35;
+
 int dur = 0;
 
 float distance1;
@@ -26,6 +31,15 @@ unsigned long lastHourTimestamp = 0;
 int entriesThisHour = 0;
 int exitsThisHour = 0;
 int DOOR=LOW;
+
+void updateLeds() {
+  int ledCount = map(num_people, 0, 20, 0, 4);
+
+  digitalWrite(led25, ledCount >= 1 ? HIGH : LOW);
+  digitalWrite(led50, ledCount >= 2 ? HIGH : LOW);
+  digitalWrite(led75, ledCount >= 3 ? HIGH : LOW);
+  digitalWrite(led100, ledCount >= 4 ? HIGH : LOW);
+}
 
 void get_distances() {
     // Read distances from ultrasonic sensors
@@ -273,6 +287,6 @@ void loop() {
     exitsThisHour = 0;
     lastHourTimestamp = currentTimestamp;
   }
-
+  updateLeds();
   delay(1000);
 }
