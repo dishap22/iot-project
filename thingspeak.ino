@@ -225,6 +225,14 @@ void loop() {
   if(exiting == 1 && distance2 < 50) {
     exiting = 2;
   }
+  if(dur == 0) {
+    if(entering == 2) {
+      entering = 0;
+    }
+    if(exiting == 2) {
+      exiting = 0;
+    }
+  }
   if(entering == 2 && distance3 < 50) {
     entering = 0;
     exiting = 0;
