@@ -12,10 +12,9 @@ const int trigPin3 = 25;
 const int echoPin3 = 26;
 const int ir = 5;
 
-const int led25 = 27;
-const int led50 = 19;
-const int led75 = 34;
-const int led100 = 35;
+const int led50 = 27;
+const int led100 = 19;
+const int ledGround = 21;
 
 int dur = 0;
 
@@ -32,14 +31,6 @@ int entriesThisHour = 0;
 int exitsThisHour = 0;
 int DOOR=LOW;
 
-void updateLeds() {
-  int ledCount = map(num_people, 0, 20, 0, 4);
-
-  digitalWrite(led25, ledCount >= 1 ? HIGH : LOW);
-  digitalWrite(led50, ledCount >= 2 ? HIGH : LOW);
-  digitalWrite(led75, ledCount >= 3 ? HIGH : LOW);
-  digitalWrite(led100, ledCount >= 4 ? HIGH : LOW);
-}
 
 void get_distances() {
     // Read distances from ultrasonic sensors
@@ -48,6 +39,19 @@ void get_distances() {
     distance3 = readDistance(trigPin3, echoPin3);
 }
 
+void updateLeds() {
+  int occupancyPercentage = (num_people * 100) / 20; // Calculate occupancy percentage
+
+  digitalWrite(led50, LOW);
+  digitalWrite(led100, LOW);
+
+  // Determine which LEDs to turn on based on occupancy percentage
+  if (occupancyPercentage >= 50 && occupancyPercentage < 100) {
+    digitalWrite(led50, HIGH); // Turn on led50
+  } else if (occupancyPercentage >= 100) {
+    digitalWrite(led100, HIGH); // Turn on led100
+  }
+}
 // Function to read distance from ultrasonic sensor
 float readDistance(int trigPin, int echoPin) {
   digitalWrite(trigPin, LOW);
@@ -192,6 +196,10 @@ void setup() {
   digitalWrite(23, LOW);
   digitalWrite(32, HIGH);
   digitalWrite(33, LOW);
+  pinMode(led50, OUTPUT);
+  pinMode(led100, OUTPUT);
+  pinMode(ledGround, OUTPUT);
+  digitalWrite(ledGround, LOW);
 }
 
 void loop() {
