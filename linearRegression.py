@@ -6,7 +6,7 @@ from sklearn.metrics import mean_squared_error
 
 # Load your sensor data into a pandas DataFrame
 # Replace 'your_data.csv' with your actual data file
-data = pd.read_csv('data1.csv', parse_dates=['created_at'], index_col='created_at')
+data = pd.read_csv('data2.csv', parse_dates=['created_at'], index_col='created_at')
 
 # Extract the number of people from 'field1'
 num_people = data['field1']
