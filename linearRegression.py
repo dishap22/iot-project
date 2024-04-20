@@ -11,37 +11,31 @@ data = pd.read_csv('data1.csv', parse_dates=['created_at'], index_col='created_a
 # Extract the number of people from 'field1'
 num_people = data['field1']
 
-# Remove rows with missing values
-num_people.dropna(inplace=True)
-
-# Split data into training and testing sets
-train_size = int(len(num_people) * 0.8)
-train, test = num_people.iloc[:train_size], num_people.iloc[train_size:]
+# Resample the data to hourly frequency and sum the values within each hour
+hourly_data = num_people.resample('h').sum().dropna()
 
 # Create feature matrix X (timestamps)
-X_train = np.arange(len(train)).reshape(-1, 1)
-X_test = np.arange(len(train), len(train) + len(test)).reshape(-1, 1)
+X_train = np.arange(len(hourly_data)).reshape(-1, 1)
 
 # Convert num_people to a numpy array
-y_train = train.values.reshape(-1, 1)
-y_test = test.values.reshape(-1, 1)
+y_train = hourly_data.values.reshape(-1, 1)
 
 # Create and fit linear regression model
 model = LinearRegression()
 model.fit(X_train, y_train)
 
 # Make predictions
-predictions = model.predict(X_test)
+predictions = model.predict(X_train)
 
 # Calculate RMSE (Root Mean Squared Error) to evaluate model performance
-rmse = np.sqrt(mean_squared_error(y_test, predictions))
+rmse = np.sqrt(mean_squared_error(y_train, predictions))
 print(f'RMSE: {rmse}')
 
 # Plot actual vs. predicted values
-plt.plot(test.index, y_test, label='Actual')
-plt.plot(test.index, predictions, label='Predicted')
+plt.plot(hourly_data.index.to_numpy(), y_train, label='Actual')
+plt.plot(hourly_data.index.to_numpy(), predictions, label='Predicted')
 plt.xlabel('Timestamp')
-plt.ylabel('Number of People')
+plt.ylabel('Num People (hourly)')
 plt.title('Actual vs. Predicted Number of People (Linear Regression)')
 plt.legend()
 plt.show()
