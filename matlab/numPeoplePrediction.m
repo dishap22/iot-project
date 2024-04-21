@@ -1,15 +1,11 @@
-% Set your ThingSpeak channel ID and field ID
+% Set your ThingSpeak channel ID
 readChannelID = 2468890; 
-TemperatureFieldID = 1;
-
-% Set your Read API Key
-readAPIKey = 'G5OXHTW582CD6TKW';
 
 % Specify the number of points to retrieve
 NumPoints = 288;
 
 % Read data from ThingSpeak
-[data, timestamps] = thingSpeakRead(readChannelID, 'NumPoints', NumPoints, 'ReadKey', readAPIKey);
+[data, timestamps] = thingSpeakRead(readChannelID, 'NumPoints', NumPoints);
 
 % Extract the number of people
 num_people = data(:, 1);
