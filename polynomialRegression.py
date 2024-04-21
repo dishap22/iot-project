@@ -12,8 +12,8 @@ data = pd.read_csv('data2.csv', parse_dates=['created_at'], index_col='created_a
 # Extract the number of people from 'field1'
 num_people = data['field1']
 
-# Resample the data to hourly frequency and sum the values within each hour
-hourly_data = num_people.resample('h').sum().dropna()
+# Resample the data to hourly frequency and calculate the mean values within each hour
+hourly_data = num_people.resample('h').mean().dropna()
 
 # Create feature matrix X (timestamps)
 X_train = np.arange(len(hourly_data)).reshape(-1, 1)
@@ -40,7 +40,7 @@ print(f'RMSE: {rmse}')
 plt.plot(hourly_data.index.to_numpy(), y_train, label='Actual')
 plt.plot(hourly_data.index.to_numpy(), predictions, label='Predicted')
 plt.xlabel('Timestamp')
-plt.ylabel('Num People (hourly)')
-plt.title('Actual vs. Predicted Number of People (Polynomial Regression)')
+plt.ylabel('Average Num People (hourly)')
+plt.title('Actual vs. Predicted Average Number of People (Polynomial Regression)')
 plt.legend()
 plt.show()
