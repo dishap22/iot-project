@@ -1,3 +1,4 @@
+% Set your ThingSpeak channel ID and field ID
 readChannelID = 2468890; 
 TemperatureFieldID = 1;
 
@@ -8,8 +9,9 @@ readAPIKey = 'G5OXHTW582CD6TKW';
 NumPoints = 288;
 
 % Read data from ThingSpeak
-[data,timestamps] = thingSpeakRead(readChannelID, 'NumPoints', NumPoints, 'ReadKey', readAPIKey);
+[data, timestamps] = thingSpeakRead(readChannelID, 'NumPoints', NumPoints, 'ReadKey', readAPIKey);
 
+% Extract the number of people
 num_people = data(:, 1);
 
 % Create a timetable from the data
@@ -17,6 +19,9 @@ timeTableData = timetable(timestamps, num_people);
 
 % Resample the data to hourly frequency and calculate the mean values within each hour
 hourly_data = retime(timeTableData, 'hourly', @mean);
+
+% Extract hourly timestamps
+hourly_timestamps = hourly_data.Properties.RowTimes;
 
 % Create feature matrix X (timestamps)
 X_train = (1:height(hourly_data))';
@@ -37,6 +42,17 @@ model_coeffs = regress(y_train, X_poly);
 
 % Make predictions
 predictions = X_poly * model_coeffs;
-hourly_timestamps = timestamps(1:12:end); % Assuming there are 12 data points per hour
 
-plot(hourly_timestamps, predictions);
+% Plot the original hourly average data
+plot(hourly_timestamps, hourly_data{:,:}, 'o-', 'LineWidth', 1.5, 'DisplayName', 'Original Data');
+hold on;
+
+% Plot the predicted hourly average data
+plot(hourly_timestamps, predictions, 'o-', 'LineWidth', 1.5, 'DisplayName', 'Predicted Data');
+
+% Customize the plot
+xlabel('Timestamp');
+ylabel('Average Num People (hourly)');
+title('Hourly Average Number of People');
+legend('Location', 'best');
+grid on;
