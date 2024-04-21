@@ -1,5 +1,5 @@
 % Set your ThingSpeak channel ID
-readChannelID = 2468890; 
+readChannelID = 2506706; 
 
 % Specify the number of points to retrieve
 NumPoints = 288;
