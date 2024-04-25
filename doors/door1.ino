@@ -12,7 +12,7 @@ const int echoPin2 = 14;
 const int trigPin3 = 25;
 const int echoPin3 = 26;
 const int ir = 5;
-int entry = 0;
+int entry = -1;
 
 
 int dur = 0;
