@@ -12,6 +12,7 @@ const int echoPin2 = 14;
 const int trigPin3 = 25;
 const int echoPin3 = 26;
 const int ir = 5;
+int entry = 0;
 
 
 int dur = 0;
@@ -22,7 +23,7 @@ float distance3;
 
 int entering = 0;
 int exiting = 0;
-int num_people = 0;
+int num_people;
 
 unsigned long lastHourTimestamp = 0;
 int entriesThisHour = 0;
@@ -207,6 +208,7 @@ String fetchLatestEntry() {
     char c = client.read();
     response += c;
   }
+  Serial.println(parse_at_curly_braces(response));
   String s = (get_feild1(parse_at_curly_braces(response)));
   return s;
 
@@ -228,7 +230,6 @@ int convert(String s)
     return num;
 } 
 
-
 void setup() {
   // put your setup code here, to run once:
   Serial.begin( 115200 );
@@ -242,7 +243,7 @@ void setup() {
   mqttClient.setCallback( mqttSubscriptionCallback );
   // Set the buffer to handle the returned JSON. NOTE: A buffer overflow of the message buffer will result in your callback not being invoked.
   mqttClient.setBufferSize( 2048 );
-
+  num_people = convert(fetchLatestEntry());
   pinMode(trigPin1, OUTPUT);
   pinMode(echoPin1, INPUT);
   pinMode(trigPin2, OUTPUT);
@@ -275,23 +276,22 @@ void loop() {
   
   // Call the loop to maintain connection to the server.
   mqttClient.loop(); 
-  int num_people = convert(fetchLatestEntry());
   Serial.print("Number of people in the room currently: ");
-  Serial.println(num_people);
   get_distances();
+  Serial.println(num_people);
 
-  if(distance1 < 20 && exiting != 2) {
+  if(distance1 < 15 && exiting != 2) {
     entering = 1;
     exiting = 0;
   }
-  if(distance3 < 20 && entering != 2) {
+  if(distance3 < 15 && entering != 2) {
     entering = 0;
     exiting = 1;     
   }
-  if(entering == 1 && distance2 < 20) {
+  if(entering == 1 && distance2 < 15) {
     entering = 2;
   }
-  if(exiting == 1 && distance2 < 20) {
+  if(exiting == 1 && distance2 < 15) {
     exiting = 2;
   }
   if(dur == 0) {
@@ -302,23 +302,37 @@ void loop() {
       exiting = 0;
     }
   }
-  if(entering == 2 && distance3 < 20) {
+  if(entering == 2 && distance3 < 15) {
     entering = 0;
     exiting = 0;
     Serial.println("Person entered");
+    num_people = convert(fetchLatestEntry());
     num_people++;
+    // Serial.println(peeps);
+    // Serial.print("Num_people: ");
+    // Serial.println(num_people);
+    // Serial.print("Peeps: ");
+    Serial.println(num_people);
     entriesThisHour++;
-    // Update ThingSpeak channel when num_people changes with random data.
-    mqttPublish( channelID, (String("field1=")+String(num_people)));
+    entry = 1;
+    Serial.println("Entry from door 2");
+    delay(1000);
   }
-  if(exiting == 2 && distance1 < 20) {
+  if(exiting == 2 && distance1 < 15) {
     entering = 0;
     exiting = 0;
     Serial.println("Person exited");
+    num_people = convert(fetchLatestEntry());
     num_people--;
+    // Serial.print("Num_people: ");
+    // Serial.println(num_people);
+    // Serial.print("Peeps: ");
+    // Serial.println(peeps);
+    Serial.println(num_people);
     exitsThisHour++;
+    Serial.println("Exit from door 2");
+    delay(1000);
     // Update ThingSpeak channel when num_people changes with random data.
-    mqttPublish( channelID, (String("field1=")+String(num_people)));
   }
   DOOR=digitalRead(ir);
   if(DOOR == HIGH){
@@ -363,6 +377,13 @@ void loop() {
     entriesThisHour = 0;
     exitsThisHour = 0;
     lastHourTimestamp = currentTimestamp;
+  }
+  mqttPublish( channelID, (String("field1=")+String(num_people)));
+  if (entry){
+    mqttPublish( channelID, (String("field6=")+String(2)));
+  }
+  else{
+    mqttPublish( channelID, (String("field5=")+String(2)));
   }
   delay(1000);
 }

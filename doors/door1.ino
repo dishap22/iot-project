@@ -228,7 +228,6 @@ int convert(String s)
     return num;
 } 
 
-
 void setup() {
   // put your setup code here, to run once:
   Serial.begin( 115200 );
@@ -275,7 +274,6 @@ void loop() {
   
   // Call the loop to maintain connection to the server.
   mqttClient.loop(); 
-  int num_people = convert(fetchLatestEntry());
   Serial.print("Number of people in the room currently: ");
   Serial.println(num_people);
   get_distances();
@@ -306,19 +304,37 @@ void loop() {
     entering = 0;
     exiting = 0;
     Serial.println("Person entered");
+    num_people = convert(fetchLatestEntry());
+    int peeps = num_people;
     num_people++;
+    peeps++;
+    // Serial.println(peeps);
+    // Serial.print("Num_people: ");
+    // Serial.println(num_people);
+    // Serial.print("Peeps: ");
+    Serial.println(peeps);
     entriesThisHour++;
-    // Update ThingSpeak channel when num_people changes with random data.
-    mqttPublish( channelID, (String("field1=")+String(num_people)));
+    mqttPublish( channelID, (String("field6=")+String(1)));
+    Serial.println("Entry from door 1");
+    mqttPublish( channelID, (String("field1=")+String(peeps)));
   }
   if(exiting == 2 && distance1 < 20) {
     entering = 0;
     exiting = 0;
     Serial.println("Person exited");
+    num_people = convert(fetchLatestEntry());
+    int peeps = num_people;
     num_people--;
+    peeps--;
+    // Serial.print("Num_people: ");
+    // Serial.println(num_people);
+    // Serial.print("Peeps: ");
+    // Serial.println(peeps);
     exitsThisHour++;
+    mqttPublish( channelID, (String("field5=")+String(1)));
+    Serial.println("Exit from door 1");
     // Update ThingSpeak channel when num_people changes with random data.
-    mqttPublish( channelID, (String("field1=")+String(num_people)));
+    mqttPublish( channelID, (String("field1=")+String(peeps)));
   }
   DOOR=digitalRead(ir);
   if(DOOR == HIGH){
