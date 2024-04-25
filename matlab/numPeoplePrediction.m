@@ -1,20 +1,51 @@
-% Set your ThingSpeak channel ID
-readChannelID = 2506706; 
+% Set your ThingSpeak channel ID and field ID
+readChannelID = 2468890; 
+TemperatureFieldID = 1;
+
+% Set your Read API Key
+readAPIKey = 'G5OXHTW582CD6TKW';
 
 % Specify the number of points to retrieve
-NumPoints = 288;
+NumPoints = 8000;
 
 % Read data from ThingSpeak
-[data, timestamps] = thingSpeakRead(readChannelID, 'NumPoints', NumPoints);
+[data, timestamps] = thingSpeakRead(readChannelID, 'NumPoints', NumPoints, 'ReadKey', readAPIKey);
 
 % Extract the number of people
-num_people = data(:, 1);
+% num_people = data(:, 1);
+
+filtered_timestamps = [];
+filtered_num_people = [];
+
+% Loop through all the data
+for i = 1:size(data, 1)
+    % Check if field1 is not empty
+    if ~isempty(data(i, 1))
+        % Append timestamp to filtered_timestamps
+        filtered_timestamps = [filtered_timestamps; timestamps(i)];
+        % Append field1 value to filtered_num_people
+        filtered_num_people = [filtered_num_people; data(i, 1)];
+    end
+end
+
+% Identify NaN values
+nan_indices = isnan(filtered_num_people);
+
+% Exclude NaN values from the timetable
+filtered_timestamps_no_nan = filtered_timestamps(~nan_indices);
+filtered_num_people_no_nan = filtered_num_people(~nan_indices);
+
+% Create a timetable from the filtered data without NaN values
+timeTableData_no_nan = timetable(filtered_timestamps_no_nan, filtered_num_people_no_nan);
+
+% Display the timetable without NaN values
+disp(timeTableData_no_nan);
 
 % Create a timetable from the data
-timeTableData = timetable(timestamps, num_people);
+% timeTableData = timetable(timestamps, num_people);
 
 % Resample the data to hourly frequency and calculate the mean values within each hour
-hourly_data = retime(timeTableData, 'hourly', @mean);
+hourly_data = retime(timeTableData_no_nan, 'hourly', @mean);
 
 % Extract hourly timestamps
 hourly_timestamps = hourly_data.Properties.RowTimes;
@@ -27,7 +58,7 @@ y_train = hourly_data{:,:};
 y_train = y_train(:);
 
 % Polynomial features
-degree = 3;
+degree = 7;
 X_poly = zeros(length(X_train), degree+1);
 for i = 1:degree+1
     X_poly(:, i) = X_train.^(i-1);
