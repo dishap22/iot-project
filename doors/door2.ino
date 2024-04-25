@@ -322,7 +322,7 @@ void loop() {
     exitsThisHour++;
     Serial.println(num_people);
     mqttPublish( channelID, (String("field1=")+String(num_people)));
-    entry = -1;
+    entry = 0;
     Serial.println("Exit from door 2");
     delay(1000);
   }
@@ -373,9 +373,9 @@ void loop() {
   if (entry == 1){
     mqttPublish( channelID, (String("field6=")+String(2)));
   }
-  if (entry == -1){
+  if (entry == 0){
     mqttPublish( channelID, (String("field5=")+String(2)));
   }
-  entry = 0;
+  entry = -1;
   delay(1000);
 }
