@@ -39,7 +39,7 @@ filtered_num_people_no_nan = filtered_num_people(~nan_indices);
 timeTableData_no_nan = timetable(filtered_timestamps_no_nan, filtered_num_people_no_nan);
 
 % Display the timetable without NaN values
-disp(timeTableData_no_nan);
+% disp(timeTableData_no_nan);
 
 % Create a timetable from the data
 % timeTableData = timetable(timestamps, num_people);
