@@ -14,13 +14,8 @@
 <div class="container">
 
     <h1 class="heading">Dashboard</h1>
-
+    <div id="latestValue" class="heading" style="font-size: 24px;"></div>
     <div class="box-container">
-        <div class="box" width="450" height="260">
-            <h1>Statistics</h1>
-            <div id="latestValue"></div>
-        </div>
-
         <div class="box">
             <iframe width="450" height="260" style="border: 1px solid #cccccc;" src="https://thingspeak.com/channels/2506706/charts/1?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=800&type=line"></iframe>
         </div>
@@ -39,6 +34,10 @@
 
         <div class="box">
             <iframe width="450" height="260" style="border: 1px solid #cccccc;" src="https://thingspeak.com/channels/2506706/charts/5?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=60&type=line&update=15"></iframe>
+        </div>
+
+        <div class="box">
+            <iframe width="450" height="260" style="border: 1px solid #cccccc;" src="https://thingspeak.com/channels/2506706/charts/6?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=60&type=line&update=15"></iframe>
         </div>
     </div>
 </div>
