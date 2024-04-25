@@ -50,10 +50,10 @@ def generate_unique_timestamps(start_timestamp, end_timestamp, num_timestamps):
     return sorted(timestamps)
 
 # Start timestamp
-start_timestamp = datetime.strptime("2024-04-05T00:00:00+00:00", "%Y-%m-%dT%H:%M:%S%z").replace(tzinfo=timezone.utc)
+start_timestamp = datetime.strptime("2024-04-16T00:00:00+00:00", "%Y-%m-%dT%H:%M:%S%z").replace(tzinfo=timezone.utc)
 
 # Open CSV file for writing
-with open('data2.csv', 'w', newline='') as csvfile:
+with open('newFile.csv', 'a', newline='') as csvfile:
     fieldnames = ['created_at', 'entry_id', 'field1', 'field2', 'field3', 'field4']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     
