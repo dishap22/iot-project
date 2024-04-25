@@ -2,6 +2,7 @@
 #include <ThingSpeak.h>
 #include <PubSubClient.h>
 #include <Arduino.h>
+#include <ArduinoJson.h>
 
 // Pin definitions for ultrasonic and IR sensors
 const int trigPin1 = 2;
@@ -12,9 +13,6 @@ const int trigPin3 = 25;
 const int echoPin3 = 26;
 const int ir = 5;
 
-const int led50 = 27;
-const int led100 = 19;
-const int ledGround = 21;
 
 int dur = 0;
 
@@ -24,7 +22,7 @@ float distance3;
 
 int entering = 0;
 int exiting = 0;
-
+int num_people = 0;
 
 unsigned long lastHourTimestamp = 0;
 int entriesThisHour = 0;
@@ -39,40 +37,6 @@ void get_distances() {
     distance3 = readDistance(trigPin3, echoPin3);
 }
 
-void mqttSubscriptionCallback(char* topic, byte* payload, unsigned int length) {
-  String payloadStr = "";
-  for (int i = 0; i < length; i++) {
-    payloadStr += (char)payload[i];
-  }
-  
-  // Print the received message to the serial monitor
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
-  Serial.println(payloadStr);
-  if (strstr(topic, "field1") != NULL) {
-    int fieldValue = payloadStr.toInt();
-    Serial.print("Received value for field1: ");
-    Serial.println(fieldValue);
-    num_people = fieldValue;
-  }
-}
-
-
-void updateLeds() {
-  int occupancyPercentage = (num_people * 100) / 20; // Calculate occupancy percentage
-
-  digitalWrite(led50, LOW);
-  digitalWrite(led100, LOW);
-
-  // Determine which LEDs to turn on based on occupancy percentage
-  if (occupancyPercentage >= 50 && occupancyPercentage < 100) {
-    digitalWrite(led50, HIGH); // Turn on led50
-  } else if (occupancyPercentage >= 100) {
-    digitalWrite(led50, HIGH);
-    digitalWrite(led100, HIGH); // Turn on led100
-  }
-}
 // Function to read distance from ultrasonic sensor
 float readDistance(int trigPin, int echoPin) {
   digitalWrite(trigPin, LOW);
@@ -123,12 +87,15 @@ const char * PROGMEM thingspeak_ca_cert = \
 WiFiClient client;
 
 const char* server = "mqtt3.thingspeak.com";
+const char* server1 = "api.thingspeak.com";
+const char* apiKey = "50QMQKRPSTGYJ1UM";
+const int fieldNum = 1;
 int status = WL_IDLE_STATUS; 
 long lastPublishMillis = 0;
 int connectionDelay = 1;
 int updateInterval = 15;
 PubSubClient mqttClient( client );
-int num_people = ThingSpeak.readLongField(channelID, 1, "Replace with API Key");
+
 // Function to handle messages from MQTT subscription.
 void mqttSubscriptionCallback( char* topic, byte* payload, unsigned int length ) {
   // Print the details of the message that was received to the serial monitor.
@@ -188,6 +155,80 @@ void mqttConnect() {
   }
 }
 
+String get_feild1(String s) {
+    String result = "";
+    for (int i = s.length() - 1; i >= 0; i--) {
+        if (s[i] == ':') {
+            for (int j = i + 1; j < s.length(); j++) {
+                if (s[j] == '"') {
+                    for (int k = j + 1; k < s.length(); k++) {
+                        if (s[k] == '"') {
+                            return result;
+                        } else {
+                            result += s[k];
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return "";
+}
+String parse_at_curly_braces(String s) {
+    String result = "";
+    bool is_curly_braces = false;
+    for (int i = 0; i < s.length(); i++) {
+        if (s[i] == '{') {
+            is_curly_braces = true;
+        } else if (s[i] == '}') {
+            is_curly_braces = false;
+        } else if (is_curly_braces) {
+            result += s[i];
+        }
+    }
+    return '{' + result + '}';
+}
+String fetchLatestEntry() {
+  if (!client.connect(server1, 80)) {
+    Serial.println("Connection failed");
+  }
+  
+  // Make HTTP request to ThingSpeak API
+  String url = "/channels/2506706/fields/" + String(fieldNum) + "/last.json?api_key=" + apiKey;
+  client.print(String("GET ") + url + " HTTP/1.1\r\n" +
+               "Host: " + server1 + "\r\n" +
+               "Connection: close\r\n\r\n");
+  
+  delay(1000);
+  
+  // Read response
+  String response = "";
+  while (client.available()) {
+    char c = client.read();
+    response += c;
+  }
+  String s = (get_feild1(parse_at_curly_braces(response)));
+  return s;
+
+}
+
+int convert(String s) 
+{ 
+    int i = 0, sign = 1, num = 0;
+    if (s[0] == '-') {
+        sign = -1;
+        i++;
+    }
+    while (s[i] != '\0') {
+        num = num * 10 + (s[i] - '0');
+        i++;
+    }
+    num *= sign;
+
+    return num;
+} 
+
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin( 115200 );
@@ -217,10 +258,6 @@ void setup() {
   digitalWrite(23, LOW);
   digitalWrite(32, HIGH);
   digitalWrite(33, LOW);
-  pinMode(led50, OUTPUT);
-  pinMode(led100, OUTPUT);
-  pinMode(ledGround, OUTPUT);
-  digitalWrite(ledGround, LOW);
 
 }
 
@@ -238,21 +275,23 @@ void loop() {
   
   // Call the loop to maintain connection to the server.
   mqttClient.loop(); 
-
+  int num_people = convert(fetchLatestEntry());
+  Serial.print("Number of people in the room currently: ");
+  Serial.println(num_people);
   get_distances();
 
-  if(distance1 < 50 && exiting != 2) {
+  if(distance1 < 20 && exiting != 2) {
     entering = 1;
     exiting = 0;
   }
-  if(distance3 < 50 && entering != 2) {
+  if(distance3 < 20 && entering != 2) {
     entering = 0;
     exiting = 1;     
   }
-  if(entering == 1 && distance2 < 50) {
+  if(entering == 1 && distance2 < 20) {
     entering = 2;
   }
-  if(exiting == 1 && distance2 < 50) {
+  if(exiting == 1 && distance2 < 20) {
     exiting = 2;
   }
   if(dur == 0) {
@@ -263,21 +302,19 @@ void loop() {
       exiting = 0;
     }
   }
-  if(entering == 2 && distance3 < 50) {
+  if(entering == 2 && distance3 < 20) {
     entering = 0;
     exiting = 0;
-    num_people = ThingSpeak.readLongField(channelID, 1, "Replace with API Key");
     Serial.println("Person entered");
     num_people++;
     entriesThisHour++;
     // Update ThingSpeak channel when num_people changes with random data.
     mqttPublish( channelID, (String("field1=")+String(num_people)));
   }
-  if(exiting == 2 && distance1 < 50) {
+  if(exiting == 2 && distance1 < 20) {
     entering = 0;
     exiting = 0;
     Serial.println("Person exited");
-    int num_people = ThingSpeak.readLongField(channelID, 1, "Replace with API Key");
     num_people--;
     exitsThisHour++;
     // Update ThingSpeak channel when num_people changes with random data.
@@ -327,6 +364,5 @@ void loop() {
     exitsThisHour = 0;
     lastHourTimestamp = currentTimestamp;
   }
-  updateLeds();
   delay(1000);
 }
