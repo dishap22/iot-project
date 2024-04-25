@@ -5,7 +5,7 @@
 #include <ArduinoJson.h>
 
 // Pin definitions for ultrasonic and IR sensors
-const int trigPin1 = 2;
+const int trigPin1 = 19;
 const int echoPin1 = 4;
 const int trigPin2 = 12;
 const int echoPin2 = 14;
@@ -50,8 +50,8 @@ float readDistance(int trigPin, int echoPin) {
 }
 
 // Ensure correct credentials to connect to your WiFi Network.
-char ssid[] = "seera";
-char pass[] = "afwd3291";
+char ssid[] = "get your own geez";
+char pass[] = "1234567*b";
 
 // Ensure that the credentials here allow you to publish and subscribe to the ThingSpeak channel.
 #define channelID 2506706 //should not be a string, just an int
@@ -208,7 +208,7 @@ String fetchLatestEntry() {
     char c = client.read();
     response += c;
   }
-  Serial.println(parse_at_curly_braces(response));
+
   String s = (get_feild1(parse_at_curly_braces(response)));
   return s;
 
@@ -263,6 +263,8 @@ void setup() {
 }
 
 void loop() {
+  num_people = convert(fetchLatestEntry());
+
   // Reconnect to WiFi if it gets disconnected.
   if (WiFi.status() != WL_CONNECTED) {
       connectWifi();
@@ -274,12 +276,10 @@ void loop() {
      mqttSubscribe( channelID );
   }
   
-  // Call the loop to maintain connection to the server.
   mqttClient.loop(); 
   Serial.print("Number of people in the room currently: ");
   get_distances();
   Serial.println(num_people);
-
   if(distance1 < 15 && exiting != 2) {
     entering = 1;
     exiting = 0;
@@ -306,14 +306,10 @@ void loop() {
     entering = 0;
     exiting = 0;
     Serial.println("Person entered");
-    num_people = convert(fetchLatestEntry());
     num_people++;
-    // Serial.println(peeps);
-    // Serial.print("Num_people: ");
-    // Serial.println(num_people);
-    // Serial.print("Peeps: ");
-    Serial.println(num_people);
     entriesThisHour++;
+    Serial.println(num_people);
+    mqttPublish( channelID, (String("field1=")+String(num_people)));
     entry = 1;
     Serial.println("Entry from door 2");
     delay(1000);
@@ -322,17 +318,13 @@ void loop() {
     entering = 0;
     exiting = 0;
     Serial.println("Person exited");
-    num_people = convert(fetchLatestEntry());
     num_people--;
-    // Serial.print("Num_people: ");
-    // Serial.println(num_people);
-    // Serial.print("Peeps: ");
-    // Serial.println(peeps);
-    Serial.println(num_people);
     exitsThisHour++;
+    Serial.println(num_people);
+    mqttPublish( channelID, (String("field1=")+String(num_people)));
+    entry = -1;
     Serial.println("Exit from door 2");
     delay(1000);
-    // Update ThingSpeak channel when num_people changes with random data.
   }
   DOOR=digitalRead(ir);
   if(DOOR == HIGH){
@@ -378,12 +370,12 @@ void loop() {
     exitsThisHour = 0;
     lastHourTimestamp = currentTimestamp;
   }
-  mqttPublish( channelID, (String("field1=")+String(num_people)));
-  if (entry){
+  if (entry == 1){
     mqttPublish( channelID, (String("field6=")+String(2)));
   }
-  else{
+  if (entry == -1){
     mqttPublish( channelID, (String("field5=")+String(2)));
   }
+  entry = 0;
   delay(1000);
 }
