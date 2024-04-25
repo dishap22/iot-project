@@ -53,3 +53,16 @@
         grid-template-columns: 1fr; /* Set to one box per row on mobile */
     }
 }
+
+.container .box-container .box:nth-child(1) {
+    width: 100%; /* Set width to 100% to occupy full width */
+    height: 320px; /* Set a fixed height */
+}
+
+.container .box-container .box:nth-child(1) #latestValue {
+    height: 100%; /* Set the height of the content area to occupy full height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
