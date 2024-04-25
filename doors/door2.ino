@@ -233,7 +233,6 @@ int convert(String s)
 void setup() {
   // put your setup code here, to run once:
   Serial.begin( 115200 );
-  num_people = convert(fetchLatestEntry());
   // Delay to allow serial monitor to come up.
   delay(3000);
   // Connect to Wi-Fi network.
@@ -244,7 +243,7 @@ void setup() {
   mqttClient.setCallback( mqttSubscriptionCallback );
   // Set the buffer to handle the returned JSON. NOTE: A buffer overflow of the message buffer will result in your callback not being invoked.
   mqttClient.setBufferSize( 2048 );
-
+  num_people = convert(fetchLatestEntry());
   pinMode(trigPin1, OUTPUT);
   pinMode(echoPin1, INPUT);
   pinMode(trigPin2, OUTPUT);
