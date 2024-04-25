@@ -309,7 +309,7 @@ void loop() {
     num_people++;
     entriesThisHour++;
     mqttPublish( channelID, (String("field6=")+String(2)));
-    Serial.println("Entry from door 2")
+    Serial.println("Entry from door 2");
     mqttPublish( channelID, (String("field1=")+String(num_people)));
   }
   if(exiting == 2 && distance1 < 20) {
@@ -319,7 +319,7 @@ void loop() {
     num_people--;
     exitsThisHour++;
     mqttPublish( channelID, (String("field5=")+String(2)));
-    Serial.println("Exit from door 2")
+    Serial.println("Exit from door 2");
     // Update ThingSpeak channel when num_people changes with random data.
     mqttPublish( channelID, (String("field1=")+String(num_people)));
   }
