@@ -1,9 +1,8 @@
 % Set your ThingSpeak channel ID and field ID
-readChannelID = 2468890; 
-TemperatureFieldID = 1;
+readChannelID = 2506706; 
 
 % Set your Read API Key
-readAPIKey = 'G5OXHTW582CD6TKW';
+readAPIKey = '50QMQKRPSTGYJ1UM';
 
 % Specify the number of points to retrieve
 NumPoints = 8000;
